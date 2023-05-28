@@ -19,6 +19,14 @@ class CartesianVector(
         return CartesianVector(newX, newY)
     }
 
+    override fun multiply(s: Double): Vector {
+        return CartesianVector(x * s, y * s)
+    }
+
+    override fun divide(s: Double): Vector {
+        return CartesianVector(x / s, y / s)
+    }
+
     fun toPolarVector(): PolarVector {
         val length = Math.sqrt(x * x + y * y)
         val angle = Math.atan2(y, x)

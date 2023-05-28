@@ -25,6 +25,14 @@ class PolarVector(
         return add(opposite)
     }
 
+    override fun multiply(s: Double): Vector {
+        return PolarVector(length * s, angle)
+    }
+
+    override fun divide(s: Double): Vector {
+        return PolarVector(length / s, angle)
+    }
+
     fun toCartesianVector(): CartesianVector {
         val x = length * Math.cos(angle)
         val y = length * Math.sin(angle)
