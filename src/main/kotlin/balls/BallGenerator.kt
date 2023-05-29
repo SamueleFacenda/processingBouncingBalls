@@ -7,24 +7,28 @@ class BallGenerator(
     private val x: Double,
     private val y: Double,
     private val radius: Double,
-    private val outerRadius: Double,
+    private val width: Double,
+    private val height: Double,
+    private val isCircle: Boolean = true
 ) {
+
+
     private val balls = mutableListOf<Pair<Double, Double>>()
     init {
-        println("Generating $numberOfBalls balls, radius $radius, outer radius $outerRadius")
         var tmpX: Double
         var tmpY: Double
         for (i in 0 until numberOfBalls){
             do {
-                tmpX = this.x + Random.nextDouble(-outerRadius + radius, outerRadius - radius)
-                tmpY = this.y + Random.nextDouble(-outerRadius + radius, outerRadius - radius)
+                tmpX = x + Random.nextDouble(-width/2 + radius, width/2 - radius)
+                tmpY = y + Random.nextDouble(-height/2 + radius, height/2 - radius)
             } while (!canFit(tmpX, tmpY))
             balls.add(Pair(tmpX, tmpY))
         }
+        println("Generated ${balls.size} balls")
     }
 
     private fun canFit(x: Double, y: Double): Boolean{
-        if (Math.sqrt(Math.pow(x - this.x, 2.0) + Math.pow(y - this.y, 2.0)) + radius > outerRadius){
+        if (isCircle && Math.sqrt(Math.pow(x - this.x, 2.0) + Math.pow(y - this.y, 2.0)) + radius > width){
             return false
         }
 

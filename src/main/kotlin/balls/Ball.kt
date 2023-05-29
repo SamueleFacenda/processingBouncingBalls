@@ -33,10 +33,18 @@ class Ball(
             one.phisicReference = oneNewSpeed
             two.phisicReference = twoNewSpeed
         }
+
+        fun getInnerRadiusForDepth(depth: Int): Double{
+            return SMALL_RADIUS * Math.pow(LAYER_RATIO, -depth.toDouble())
+        }
+
+        fun getOuterRadiusForDepth(depth: Int): Double{
+            return getInnerRadiusForDepth(depth) * OUTER_RADIUS_RATIO
+        }
     }
 
-    private val innerRadius = SMALL_RADIUS * Math.pow(LAYER_RATIO, -depth.toDouble())
-    private val outerRadius = innerRadius * OUTER_RADIUS_RATIO
+    private val innerRadius = getInnerRadiusForDepth(depth)
+    private val outerRadius = getOuterRadiusForDepth(depth)
 
     private val x: Double by this
     private val y: Double by this
@@ -53,7 +61,8 @@ class Ball(
         if (depth < maxDepth) numberOfChildren else 0,
         x,
         y,
-        SMALL_RADIUS * Math.pow(LAYER_RATIO, -(depth.toDouble() + 1)) * OUTER_RADIUS_RATIO,
+        getOuterRadiusForDepth(depth + 1),
+        innerRadius,
         innerRadius
     ).getBalls().map {
         Ball(

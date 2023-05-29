@@ -12,15 +12,21 @@ class BallContainer(
     private val sketch: PApplet
 ) {
     private val maxDepth: Int = numberOfLayer - 1
-    private val balls: List<Ball> = (1..numberOfChild).map { getNewBall() }
-
-    private fun getNewBall(): Ball{
-        return Ball(
+    private val balls: List<Ball> = BallGenerator(
+        numberOfChild,
+        width / 2.0,
+        height / 2.0,
+        Ball.getOuterRadiusForDepth(0),
+        width,
+        height,
+        false
+    ).getBalls().map {
+        Ball(
             numberOfChildren = numberOfChild,
             depth = 0,
             maxDepth = maxDepth,
-            startX = Random.nextDouble(0.0, width),
-            startY = Random.nextDouble(0.0, height),
+            startX = it.first,
+            startY = it.second,
             startSpeed = PolarVector(
                 Random.nextDouble(20.0, 50.0),
                 Random.nextDouble(0.0, 2 * Math.PI)
