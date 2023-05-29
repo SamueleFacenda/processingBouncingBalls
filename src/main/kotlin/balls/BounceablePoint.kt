@@ -3,6 +3,7 @@ package balls
 import vectors.CartesianVector
 import vectors.PolarVector
 import vectors.Vector
+import kotlin.reflect.KProperty
 
 class BounceablePoint(
     private val mass: Double = 0.0,
@@ -15,6 +16,16 @@ class BounceablePoint(
         val newX = x + speed.getX() * time
         val newY = y + speed.getY() * time
         return BounceablePoint(mass, speed, newX, newY)
+    }
+
+    fun reverseX(): BounceablePoint {
+        val newSpeed = CartesianVector(-speed.getX(), speed.getY())
+        return BounceablePoint(mass, newSpeed, x, y)
+    }
+
+    fun reverseY(): BounceablePoint {
+        val newSpeed = CartesianVector(speed.getX(), -speed.getY())
+        return BounceablePoint(mass, newSpeed, x, y)
     }
 
     fun bounceOn(other: BounceablePoint): BounceablePoint {
@@ -70,17 +81,15 @@ class BounceablePoint(
         //val v2 = (u2 * Math.sin(Alpha2)) / Math.sin(B2)
 
         val newSpeed = PolarVector(v1, angleOfCentersLine + B1)
-        println("new speed: ${newSpeed.getLength()}")
         return BounceablePoint(mass, newSpeed, x, y)
     }
 
-    fun reverseX(): BounceablePoint {
-        val newSpeed = CartesianVector(-speed.getX(), speed.getY())
-        return BounceablePoint(mass, newSpeed, x, y)
+    operator fun getValue(ball: Ball, property: KProperty<*>): Double {
+        when (property.name) {
+            "x" -> return x
+            "y" -> return y
+            else -> throw IllegalArgumentException("Unknown property ${property.name}")
+        }
     }
 
-    fun reverseY(): BounceablePoint {
-        val newSpeed = CartesianVector(speed.getX(), -speed.getY())
-        return BounceablePoint(mass, newSpeed, x, y)
-    }
 }

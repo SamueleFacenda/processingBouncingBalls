@@ -4,6 +4,7 @@ import processing.core.PApplet
 import vectors.CartesianVector
 import vectors.Vector
 import kotlin.random.Random
+import kotlin.reflect.KProperty
 
 class Ball(
     private val numberOfChildren: Int = 0,
@@ -36,18 +37,27 @@ class Ball(
     private val innerRadius = SMALL_RADIUS * Math.pow(LAYER_RATIO, layer.toDouble())
     private val outerRadius = innerRadius * OUTER_RADIUS_RATIO
 
-    private val x: Double by phisicReference::x
-    private val y: Double by phisicReference::y
+    private val x: Double by this
+    private val y: Double by this
+
+    operator fun getValue(ball: Ball, property: KProperty<*>): Double {
+        when (property.name) {
+            "x" -> return phisicReference.x
+            "y" -> return phisicReference.y
+            else -> throw IllegalArgumentException("Unknown property ${property.name}")
+        }
+    }
 
     private val children = List<Ball>(if (layer > 0) numberOfChildren else 0) { getNewChildren() }
 
     private fun getNewChildren(): Ball{
+        val newBallOuterRadius = SMALL_RADIUS * Math.pow(LAYER_RATIO, layer.toDouble() -1) * OUTER_RADIUS_RATIO
         return Ball(
             numberOfChildren = numberOfChildren,
             layer = layer - 1,
-            startX = x + Random.nextDouble(-innerRadius, innerRadius),
-            startY = y + Random.nextDouble(-innerRadius, innerRadius),
-            startSpeed = phisicReference.speed / LAYER_RATIO * Random.nextDouble(0.95, 1.05)
+            startX = x + Random.nextDouble(-innerRadius + newBallOuterRadius, innerRadius - newBallOuterRadius),
+            startY = y + Random.nextDouble(-innerRadius + newBallOuterRadius, innerRadius - newBallOuterRadius),
+            startSpeed = phisicReference.speed / LAYER_RATIO * Random.nextDouble(0.5, 2.0)
         )
     }
 
@@ -63,7 +73,6 @@ class Ball(
             for (other in children){
                 if (child != other && !alreadyChecked.contains(Pair(child, other))){
                     if (child.isCollidingWith(other)){
-                        println("Bounce")
                         makeBounce(child, other)
                     }
                     alreadyChecked.add(Pair(child, other))
@@ -99,7 +108,7 @@ class Ball(
     }
 
     fun updateForwardOfTime(time: Double) {
-        phisicReference.moveOfTime(time)
+        phisicReference = phisicReference.moveOfTime(time)
         children.forEach { it.updateForwardOfTime(time) }
     }
 
