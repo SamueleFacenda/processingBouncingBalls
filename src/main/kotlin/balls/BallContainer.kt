@@ -28,16 +28,33 @@ class BallContainer(
             startX = it.first,
             startY = it.second,
             startSpeed = PolarVector(
-                Random.nextDouble(20.0, 50.0),
+                Random.nextDouble(30.0, 70.0),
                 Random.nextDouble(0.0, 2 * Math.PI)
             )
         )
     }
 
     fun update(){
+        checkForChildrenCollissions()
         balls.forEach { it.checkCollisionsAndUpdate() }
         balls.forEach { it.updateForwardOfTime(1.0 / sketch.frameRate.toDouble()) }
         balls.forEach { it.checkForBounceOnBoundaryOf(width, height) }
+    }
+
+    private fun checkForChildrenCollissions() {
+        val alreadyChecked = mutableSetOf<Pair<Ball, Ball>>()
+
+        for (child in balls){
+            for (other in balls){
+                if (child != other && !alreadyChecked.contains(Pair(child, other))){
+                    if (child.isCollidingWith(other)){
+                        Ball.makeBounce(child, other)
+                    }
+                    alreadyChecked.add(Pair(child, other))
+                    alreadyChecked.add(Pair(other, child))
+                }
+            }
+        }
     }
 
     fun draw(){

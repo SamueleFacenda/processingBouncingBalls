@@ -15,16 +15,17 @@ class Ball(
     val startSpeed: Vector = CartesianVector(0.0, 0.0)
 ) {
     private var phisicReference: BounceablePoint = BounceablePoint(
-        ((1 shl (maxDepth * 5)) shr (depth * 5)).toDouble(), // higher layer balls are heavier
+        ((1 shl (maxDepth * MASS_RATIO_POWER)) shr (depth * MASS_RATIO_POWER)).toDouble(), // higher layer balls are heavier
         startSpeed,
         startX,
         startY
     )
 
     companion object{
-        const val SMALL_RADIUS = 100.0
+        const val SMALL_RADIUS = 120.0
         const val OUTER_RADIUS_RATIO = 1.1
         const val LAYER_RATIO = 5.1
+        const val MASS_RATIO_POWER = 6
 
         fun makeBounce(one: Ball, two: Ball) {
             val oneNewSpeed = one.phisicReference.bounceOn(two.phisicReference)
@@ -96,7 +97,7 @@ class Ball(
         }
     }
 
-    private fun isCollidingWith(other: Ball): Boolean{
+    fun isCollidingWith(other: Ball): Boolean{
         when {
             depth == other.depth -> return isCollidingWithBorderOF(other)
             depth > other.depth -> return isCollidingInternallyWith(other)
@@ -135,7 +136,7 @@ class Ball(
 
     private fun checkUpperBoundary() {
         if (y - outerRadius < 0) {
-            if (phisicReference.y < 0.0) {
+            if (phisicReference.speed.getY() < 0.0) {
                 phisicReference = phisicReference.reverseY()
             } else {
                 phisicReference += CartesianVector(0.0, 0.1)
@@ -145,7 +146,7 @@ class Ball(
 
     private fun checkLowerBoundary(height: Double) {
         if (y + outerRadius > height) {
-            if (phisicReference.y > 0.0) {
+            if (phisicReference.speed.getY() > 0.0) {
                 phisicReference = phisicReference.reverseY()
             } else {
                 phisicReference += CartesianVector(0.0, -0.1)
@@ -155,7 +156,7 @@ class Ball(
 
     private fun checkLeftBoundary() {
         if (x - outerRadius < 0) {
-            if (phisicReference.x < 0.0) {
+            if (phisicReference.speed.getX() < 0.0) {
                 phisicReference = phisicReference.reverseX()
             } else {
                 phisicReference += CartesianVector(0.1, 0.0)
@@ -165,10 +166,18 @@ class Ball(
 
     private fun checkRightBoundary(width: Double) {
         if (x + outerRadius > width) {
-            if (phisicReference.x > 0.0) {
+            if (phisicReference.speed.getX() > 0.0) {
                 phisicReference = phisicReference.reverseX()
             } else {
                 phisicReference += CartesianVector(-0.1, 0.0)
+            }
+        }
+    }
+
+    fun checkCollisionsWith(other: List<Ball>){
+        for (ball in other){
+            if (isCollidingWith(ball)){
+                makeBounce(this, ball)
             }
         }
     }

@@ -89,7 +89,7 @@ class BounceablePoint(
         val v1 = (u1 * Math.sin(Alpha1)) / Math.sin(B1)
         //val v2 = (u2 * Math.sin(Alpha2)) / Math.sin(B2)
 
-        val newSpeed = PolarVector(v1, angleOfCentersLine + B1)
+        val newSpeed = PolarVector(v1, angleOfCentersLine - B1)
         return BounceablePoint(mass, newSpeed, x, y)
     }
 
