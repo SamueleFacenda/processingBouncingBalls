@@ -10,6 +10,7 @@ interface Vector {
     fun getLength(): Double {
         return Math.sqrt(getX() * getX() + getY() * getY())
     }
+    fun projectOnDirection(dir: Double): Vector
 
     operator fun plus(v: Vector): Vector {
         return add(v)

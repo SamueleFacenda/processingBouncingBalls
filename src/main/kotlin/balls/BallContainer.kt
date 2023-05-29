@@ -28,7 +28,7 @@ class BallContainer(
             startX = it.first,
             startY = it.second,
             startSpeed = PolarVector(
-                Random.nextDouble(30.0, 70.0),
+                Random.nextDouble(40.0, 100.0),
                 Random.nextDouble(0.0, 2 * Math.PI)
             )
         )

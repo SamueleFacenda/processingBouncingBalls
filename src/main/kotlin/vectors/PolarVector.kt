@@ -58,4 +58,9 @@ class PolarVector(
             else -> throw IllegalArgumentException("Unknown vector type")
         }
     }
+
+    override fun projectOnDirection(dir: Double): Vector {
+        val newAngle = angle - dir
+        return PolarVector(length * Math.cos(newAngle), newAngle)
+    }
 }

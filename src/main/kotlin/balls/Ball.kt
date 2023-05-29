@@ -33,6 +33,9 @@ class Ball(
 
             one.phisicReference = oneNewSpeed
             two.phisicReference = twoNewSpeed
+
+            one.latestBouncesCounter[two] = 0
+            two.latestBouncesCounter[one] = 0
         }
 
         fun getInnerRadiusForDepth(depth: Int): Double{
@@ -72,11 +75,15 @@ class Ball(
             maxDepth = maxDepth,
             startX = it.first,
             startY = it.second,
-            startSpeed = phisicReference.speed / LAYER_RATIO * Random.nextDouble(0.9, 1.2)
+            startSpeed = phisicReference.speed / Math.pow(LAYER_RATIO, depth.toDouble() + 1) * Random.nextDouble(0.5, 1.2)
         )
     }
 
+    private val latestBouncesCounter = mutableMapOf<Ball, Int>()
+    private val nextCollisionsDirections = mutableSetOf<Double>()
+
     fun checkCollisionsAndUpdate(){
+        updateDebouncerMap()
         val alreadyChecked = mutableSetOf<Pair<Ball, Ball>>()
 
         for (child in children){
@@ -97,20 +104,46 @@ class Ball(
         }
     }
 
-    fun isCollidingWith(other: Ball): Boolean{
-        when {
-            depth == other.depth -> return isCollidingWithBorderOF(other)
-            depth > other.depth -> return isCollidingInternallyWith(other)
-            else -> return other.isCollidingInternallyWith(this)
+    private fun updateDebouncerMap() {
+        val iterator = latestBouncesCounter.iterator()
+        while (iterator.hasNext()){
+            val entry = iterator.next()
+            if (entry.value > 5){
+                iterator.remove()
+            } else {
+                latestBouncesCounter[entry.key] = entry.value + 1
+            }
         }
     }
 
-    private fun isCollidingWithBorderOF(other: Ball): Boolean{
-        return Math.sqrt(Math.pow(x - other.x, 2.0) + Math.pow(y - other.y, 2.0)) < outerRadius + other.outerRadius
+    fun isCollidingWith(other: Ball): Boolean{
+        if (other in latestBouncesCounter){
+            return false
+        }
+
+        when {
+            depth == other.depth -> return willCollidingWithBorderOF(other)
+            depth > other.depth -> return willCollidingInternallyWith(other)
+            else -> return other.willCollidingInternallyWith(this)
+        }
     }
 
-    private fun isCollidingInternallyWith(other: Ball): Boolean{
-        return Math.sqrt(Math.pow(x - other.x, 2.0) + Math.pow(y - other.y, 2.0)) + outerRadius > other.innerRadius
+    private fun willCollidingWithBorderOF(other: Ball): Boolean{
+        val nextPosition = phisicReference.moveOfTime(1.0 / 60.0)
+        val willCollide = Math.sqrt(Math.pow(nextPosition.x - other.x, 2.0) + Math.pow(nextPosition.y - other.y, 2.0)) < outerRadius + other.outerRadius
+        if (willCollide) {
+            nextCollisionsDirections.add(Math.atan2(other.y - y, other.x - x))
+        }
+        return willCollide
+    }
+
+    private fun willCollidingInternallyWith(other: Ball): Boolean{
+        val nextPosition = phisicReference.moveOfTime(1.0 / 60.0)
+        val willCollide = Math.sqrt(Math.pow(nextPosition.x - other.x, 2.0) + Math.pow(nextPosition.y - other.y, 2.0)) + outerRadius > other.innerRadius
+        if (willCollide) {
+            nextCollisionsDirections.add(- Math.atan2(other.y - y, other.x - x))
+        }
+        return willCollide
     }
 
     fun drawOn(sketch: PApplet) {
@@ -123,8 +156,24 @@ class Ball(
     }
 
     fun updateForwardOfTime(time: Double) {
+        val oldSpeed = phisicReference.speed
+
+        // if there are collisions, we need to update the speed to block the movement in such directions
+        if (nextCollisionsDirections.isNotEmpty()){
+            var speedToUse = oldSpeed
+            nextCollisionsDirections.forEach {
+                val speedInDirection = speedToUse.projectOnDirection(it)
+                speedToUse -= speedInDirection
+            }
+            phisicReference = phisicReference.withSpeed(speedToUse)
+            nextCollisionsDirections.clear()
+        }
+
         phisicReference = phisicReference.moveOfTime(time)
         children.forEach { it.updateForwardOfTime(time) }
+
+        // restore the speed
+        phisicReference = phisicReference.withSpeed(oldSpeed)
     }
 
     fun checkForBounceOnBoundaryOf(width: Double, height: Double) {

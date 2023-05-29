@@ -37,6 +37,19 @@ class BounceablePoint(
         return accelerate(v)
     }
 
+    fun divideSpeed(s: Double): BounceablePoint {
+        val newSpeed = speed / s
+        return BounceablePoint(mass, newSpeed, x, y)
+    }
+
+    operator fun div(s: Double): BounceablePoint {
+        return divideSpeed(s)
+    }
+
+    fun withSpeed(v: Vector): BounceablePoint {
+        return BounceablePoint(mass, v, x, y)
+    }
+
     fun bounceOn(other: BounceablePoint): BounceablePoint {
 
         // m1 * v1 * cos B1 + m2 * v2 * cos B2 = m1 * u1 * cos A1 + m2 * u2 * cos A2

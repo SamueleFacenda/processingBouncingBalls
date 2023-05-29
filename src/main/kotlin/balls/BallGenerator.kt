@@ -33,13 +33,11 @@ class BallGenerator(
             } while (!canFit(tmpX, tmpY) && numberOfTries < 1000)
 
             if (numberOfTries >= 1000){
-                println("Failed to generate balls, radiuss: $radius, width: $width, height: $height")
                 return false
             }
 
             balls.add(Pair(tmpX, tmpY))
         }
-        println("Generated ${balls.size} balls")
 
         return true
     }

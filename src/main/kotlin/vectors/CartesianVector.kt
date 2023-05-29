@@ -49,4 +49,8 @@ class CartesianVector(
             else -> throw IllegalArgumentException("Unknown vector type")
         }
     }
+
+    override fun projectOnDirection(dir: Double): Vector {
+        return toPolarVector().projectOnDirection(dir)
+    }
 }

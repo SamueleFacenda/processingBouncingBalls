@@ -3,7 +3,7 @@ package sketches
 import balls.BallContainer
 import processing.core.PApplet
 
-class FirstSketch: PApplet() {
+object FirstSketch: PApplet() {
     private val WIDTH = 800
     private val HEIGHT = 600
 
@@ -15,8 +15,8 @@ class FirstSketch: PApplet() {
     private val container = BallContainer(
         height = HEIGHT.toDouble(),
         width = WIDTH.toDouble(),
-        numberOfChild = 3,
-        numberOfLayer = 2,
+        numberOfChild = 4,
+        numberOfLayer = 3,
         sketch = this
     )
 
