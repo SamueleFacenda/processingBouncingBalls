@@ -50,7 +50,7 @@ class Ball(
     }
 
     private val children = BallGenerator(
-        numberOfChildren,
+        if (depth < maxDepth) numberOfChildren else 0,
         x,
         y,
         SMALL_RADIUS * Math.pow(LAYER_RATIO, -(depth.toDouble() + 1)) * OUTER_RADIUS_RATIO,
