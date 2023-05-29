@@ -1,11 +1,24 @@
 package sketches
 
+import balls.BallContainer
 import processing.core.PApplet
 
 class FirstSketch: PApplet() {
+    private val WIDTH = 800
+    private val HEIGHT = 600
+
+
     override fun settings() {
-        size(800, 600)
+        size(WIDTH, HEIGHT)
     }
+
+    private val container = BallContainer(
+        height = HEIGHT.toDouble(),
+        width = WIDTH.toDouble(),
+        numberOfChild = 3,
+        numberOfLayer = 3,
+        sketch = this
+    )
 
     override fun setup() {
         background(255)
@@ -14,6 +27,8 @@ class FirstSketch: PApplet() {
     override fun draw() {
         background(255)
         fill(0)
-        ellipse(mouseX.toFloat(), mouseY.toFloat(), 50f, 50f)
+
+        container.update()
+        container.draw()
     }
 }
