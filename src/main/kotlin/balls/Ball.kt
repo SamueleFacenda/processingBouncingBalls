@@ -8,22 +8,23 @@ import kotlin.reflect.KProperty
 
 class Ball(
     private val numberOfChildren: Int = 0,
-    private val layer: Int = 0,
+    private val depth: Int = 0,
+    private val maxDepth: Int = 0,
     val startX: Double = 0.0,
     val startY: Double = 0.0,
     val startSpeed: Vector = CartesianVector(0.0, 0.0)
 ) {
     private var phisicReference: BounceablePoint = BounceablePoint(
-        (2 shl (layer * 3)).toDouble(), // higher layer balls are heavier
+        ((1 shl (maxDepth * 5)) shr (depth * 5)).toDouble(), // higher layer balls are heavier
         startSpeed,
         startX,
         startY
     )
 
     companion object{
-        const val SMALL_RADIUS = 10.0
+        const val SMALL_RADIUS = 100.0
         const val OUTER_RADIUS_RATIO = 1.1
-        const val LAYER_RATIO = 2.1
+        const val LAYER_RATIO = 5.1
 
         fun makeBounce(one: Ball, two: Ball) {
             val oneNewSpeed = one.phisicReference.bounceOn(two.phisicReference)
@@ -34,7 +35,7 @@ class Ball(
         }
     }
 
-    private val innerRadius = SMALL_RADIUS * Math.pow(LAYER_RATIO, layer.toDouble())
+    private val innerRadius = SMALL_RADIUS * Math.pow(LAYER_RATIO, -depth.toDouble())
     private val outerRadius = innerRadius * OUTER_RADIUS_RATIO
 
     private val x: Double by this
@@ -48,16 +49,17 @@ class Ball(
         }
     }
 
-    private val children = List<Ball>(if (layer > 0) numberOfChildren else 0) { getNewChildren() }
+    private val children = List<Ball>(if (depth < maxDepth) numberOfChildren else 0) { getNewChildren() }
 
     private fun getNewChildren(): Ball{
-        val newBallOuterRadius = SMALL_RADIUS * Math.pow(LAYER_RATIO, layer.toDouble() -1) * OUTER_RADIUS_RATIO
+        val newBallOuterRadius = SMALL_RADIUS * Math.pow(LAYER_RATIO, -(depth.toDouble() + 1)) * OUTER_RADIUS_RATIO
         return Ball(
             numberOfChildren = numberOfChildren,
-            layer = layer - 1,
+            depth = depth + 1,
+            maxDepth = maxDepth,
             startX = x + Random.nextDouble(-innerRadius + newBallOuterRadius, innerRadius - newBallOuterRadius),
             startY = y + Random.nextDouble(-innerRadius + newBallOuterRadius, innerRadius - newBallOuterRadius),
-            startSpeed = phisicReference.speed / LAYER_RATIO * Random.nextDouble(0.5, 2.0)
+            startSpeed = phisicReference.speed / LAYER_RATIO * Random.nextDouble(0.9, 1.2)
         )
     }
 
@@ -84,9 +86,9 @@ class Ball(
 
     private fun isCollidingWith(other: Ball): Boolean{
         when {
-            layer == other.layer -> return isCollidingInternallyWith(other)
-            layer < other.layer -> return isCollidingWithBorderOF(other)
-            else -> return other.isCollidingWithBorderOF(this)
+            depth == other.depth -> return isCollidingWithBorderOF(other)
+            depth > other.depth -> return isCollidingInternallyWith(other)
+            else -> return other.isCollidingInternallyWith(this)
         }
     }
 
@@ -121,25 +123,30 @@ class Ball(
 
     private fun checkUpperBoundary() {
         if (y - outerRadius < 0) {
-            phisicReference = phisicReference.reverseY()
+            if (phisicReference.y < 0.0) {
+                phisicReference = phisicReference.reverseY()
+            } else {
+                phisicReference = phisicReference.stopY()
+            }
         }
     }
 
     private fun checkLowerBoundary(height: Double) {
-        if (y + outerRadius > height) {
+        if (y + outerRadius > height && phisicReference.y > 0.0) {
             phisicReference = phisicReference.reverseY()
         }
     }
 
     private fun checkLeftBoundary() {
-        if (x - outerRadius < 0) {
+        if (x - outerRadius < 0 && phisicReference.x < 0.0) {
             phisicReference = phisicReference.reverseX()
         }
     }
 
     private fun checkRightBoundary(width: Double) {
-        if (x + outerRadius > width) {
+        if (x + outerRadius > width && phisicReference.x > 0.0) {
             phisicReference = phisicReference.reverseX()
         }
     }
+
 }
