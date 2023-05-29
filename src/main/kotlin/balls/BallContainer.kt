@@ -17,8 +17,8 @@ class BallContainer(
         return Ball(
             numberOfChildren = numberOfChild,
             layer = numberOfLayer,
-            startX = width / 2,
-            startY = height / 2,
+            startX = Random.nextDouble(0.0, width),
+            startY = Random.nextDouble(0.0, height),
             startSpeed = PolarVector(
                 Random.nextDouble(0.0, 10.0),
                 Random.nextDouble(0.0, 2 * Math.PI)
@@ -27,6 +27,7 @@ class BallContainer(
     }
 
     fun update(){
+        balls.forEach { it.checkCollisionsAndUpdate() }
         balls.forEach { it.updateForwardOfTime(1 / sketch.frameRate.toDouble()) }
         balls.forEach { it.checkForBounceOnBoundaryOf(width, height) }
     }

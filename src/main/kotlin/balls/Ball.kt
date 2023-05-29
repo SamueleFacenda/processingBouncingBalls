@@ -22,7 +22,7 @@ class Ball(
     companion object{
         const val SMALL_RADIUS = 10.0
         const val OUTER_RADIUS_RATIO = 1.1
-        const val LAYER_RATIO = 3.1
+        const val LAYER_RATIO = 2.1
 
         fun makeBounce(one: Ball, two: Ball) {
             val oneNewSpeed = one.phisicReference.bounceOn(two.phisicReference)
@@ -33,8 +33,8 @@ class Ball(
         }
     }
 
-    private val innserRadius = SMALL_RADIUS * Math.pow(LAYER_RATIO, layer.toDouble())
-    private val outerRadius = innserRadius * OUTER_RADIUS_RATIO
+    private val innerRadius = SMALL_RADIUS * Math.pow(LAYER_RATIO, layer.toDouble())
+    private val outerRadius = innerRadius * OUTER_RADIUS_RATIO
 
     private val x: Double by phisicReference::x
     private val y: Double by phisicReference::y
@@ -45,9 +45,9 @@ class Ball(
         return Ball(
             numberOfChildren = numberOfChildren,
             layer = layer - 1,
-            startX = x,
-            startY = y,
-            startSpeed = phisicReference.speed / LAYER_RATIO * Random.nextDouble(51.3257, 52.4557)
+            startX = x + Random.nextDouble(-innerRadius, innerRadius),
+            startY = y + Random.nextDouble(-innerRadius, innerRadius),
+            startSpeed = phisicReference.speed / LAYER_RATIO * Random.nextDouble(0.95, 1.05)
         )
     }
 
@@ -63,6 +63,7 @@ class Ball(
             for (other in children){
                 if (child != other && !alreadyChecked.contains(Pair(child, other))){
                     if (child.isCollidingWith(other)){
+                        println("Bounce")
                         makeBounce(child, other)
                     }
                     alreadyChecked.add(Pair(child, other))
@@ -85,14 +86,14 @@ class Ball(
     }
 
     private fun isCollidingInternallyWith(other: Ball): Boolean{
-        return Math.sqrt(Math.pow(x - other.x, 2.0) + Math.pow(y - other.y, 2.0)) + outerRadius > other.innserRadius
+        return Math.sqrt(Math.pow(x - other.x, 2.0) + Math.pow(y - other.y, 2.0)) + outerRadius > other.innerRadius
     }
 
     fun drawOn(sketch: PApplet) {
         sketch.fill(0)
         sketch.ellipse(x.toFloat(), y.toFloat(), (outerRadius * 2).toFloat(), (outerRadius * 2).toFloat())
         sketch.fill(255)
-        sketch.ellipse(x.toFloat(), y.toFloat(), (innserRadius * 2).toFloat(), (innserRadius * 2).toFloat())
+        sketch.ellipse(x.toFloat(), y.toFloat(), (innerRadius * 2).toFloat(), (innerRadius * 2).toFloat())
 
         children.forEach { it.drawOn(sketch) }
     }

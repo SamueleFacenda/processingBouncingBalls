@@ -30,5 +30,6 @@ class FirstSketch: PApplet() {
 
         container.update()
         container.draw()
+        println(frameRate)
     }
 }
