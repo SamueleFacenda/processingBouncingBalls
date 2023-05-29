@@ -49,16 +49,19 @@ class Ball(
         }
     }
 
-    private val children = List<Ball>(if (depth < maxDepth) numberOfChildren else 0) { getNewChildren() }
-
-    private fun getNewChildren(): Ball{
-        val newBallOuterRadius = SMALL_RADIUS * Math.pow(LAYER_RATIO, -(depth.toDouble() + 1)) * OUTER_RADIUS_RATIO
-        return Ball(
+    private val children = BallGenerator(
+        numberOfChildren,
+        x,
+        y,
+        SMALL_RADIUS * Math.pow(LAYER_RATIO, -(depth.toDouble() + 1)) * OUTER_RADIUS_RATIO,
+        innerRadius
+    ).getBalls().map {
+        Ball(
             numberOfChildren = numberOfChildren,
             depth = depth + 1,
             maxDepth = maxDepth,
-            startX = x + Random.nextDouble(-innerRadius + newBallOuterRadius, innerRadius - newBallOuterRadius),
-            startY = y + Random.nextDouble(-innerRadius + newBallOuterRadius, innerRadius - newBallOuterRadius),
+            startX = it.first,
+            startY = it.second,
             startSpeed = phisicReference.speed / LAYER_RATIO * Random.nextDouble(0.9, 1.2)
         )
     }
@@ -126,26 +129,38 @@ class Ball(
             if (phisicReference.y < 0.0) {
                 phisicReference = phisicReference.reverseY()
             } else {
-                phisicReference = phisicReference.stopY()
+                phisicReference += CartesianVector(0.0, 0.1)
             }
         }
     }
 
     private fun checkLowerBoundary(height: Double) {
-        if (y + outerRadius > height && phisicReference.y > 0.0) {
-            phisicReference = phisicReference.reverseY()
+        if (y + outerRadius > height) {
+            if (phisicReference.y > 0.0) {
+                phisicReference = phisicReference.reverseY()
+            } else {
+                phisicReference += CartesianVector(0.0, -0.1)
+            }
         }
     }
 
     private fun checkLeftBoundary() {
-        if (x - outerRadius < 0 && phisicReference.x < 0.0) {
-            phisicReference = phisicReference.reverseX()
+        if (x - outerRadius < 0) {
+            if (phisicReference.x < 0.0) {
+                phisicReference = phisicReference.reverseX()
+            } else {
+                phisicReference += CartesianVector(0.1, 0.0)
+            }
         }
     }
 
     private fun checkRightBoundary(width: Double) {
-        if (x + outerRadius > width && phisicReference.x > 0.0) {
-            phisicReference = phisicReference.reverseX()
+        if (x + outerRadius > width) {
+            if (phisicReference.x > 0.0) {
+                phisicReference = phisicReference.reverseX()
+            } else {
+                phisicReference += CartesianVector(-0.1, 0.0)
+            }
         }
     }
 

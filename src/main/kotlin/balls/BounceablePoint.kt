@@ -28,6 +28,15 @@ class BounceablePoint(
         return BounceablePoint(mass, newSpeed, x, y)
     }
 
+    fun accelerate(v: Vector): BounceablePoint {
+        val newSpeed = speed.add(v)
+        return BounceablePoint(mass, newSpeed, x, y)
+    }
+
+    operator fun plus(v: Vector): BounceablePoint {
+        return accelerate(v)
+    }
+
     fun bounceOn(other: BounceablePoint): BounceablePoint {
 
         // m1 * v1 * cos B1 + m2 * v2 * cos B2 = m1 * u1 * cos A1 + m2 * u2 * cos A2
