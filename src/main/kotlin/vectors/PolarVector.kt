@@ -13,6 +13,10 @@ class PolarVector(
         return length * Math.sin(angle)
     }
 
+    override fun getLength(): Double {
+        return length
+    }
+
     override fun add(v: Vector): Vector {
         val other = convertToPolar(v)
         val newLengt = Math.sqrt(

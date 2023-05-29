@@ -7,6 +7,9 @@ interface Vector {
     fun divide(s: Double): Vector
     fun getX(): Double
     fun getY(): Double
+    fun getLength(): Double {
+        return Math.sqrt(getX() * getX() + getY() * getY())
+    }
 
     operator fun plus(v: Vector): Vector {
         return add(v)
