@@ -140,7 +140,7 @@ class Ball(
         val nextPosition = phisicReference.moveOfTime(1.0 / 60.0)
         val willCollide = Math.sqrt(Math.pow(nextPosition.x - other.x, 2.0) + Math.pow(nextPosition.y - other.y, 2.0)) + outerRadius > other.innerRadius
         if (willCollide) {
-            nextCollisionsDirections.add( -Math.atan2(other.y - y, other.x - x))
+            nextCollisionsDirections.add(-Math.atan2(other.y - y, other.x - x))
         }
         return willCollide
     }
