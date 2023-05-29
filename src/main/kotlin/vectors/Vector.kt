@@ -5,6 +5,8 @@ interface Vector {
     fun subtract(v: Vector): Vector
     fun multiply(s: Double): Vector
     fun divide(s: Double): Vector
+    fun getX(): Double
+    fun getY(): Double
 
     operator fun plus(v: Vector): Vector {
         return add(v)

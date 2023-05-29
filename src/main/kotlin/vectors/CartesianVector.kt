@@ -5,6 +5,15 @@ class CartesianVector(
     private val x: Double,
     private val y: Double
 ): Vector {
+
+    override fun getX(): Double {
+        return x
+    }
+
+    override fun getY(): Double {
+        return y
+    }
+
     override fun add(v: Vector): Vector {
         val other = convertToCartesian(v)
         val newX = x + other.x

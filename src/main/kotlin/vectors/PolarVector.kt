@@ -5,6 +5,14 @@ class PolarVector(
     val angle: Double
 ): Vector {
 
+    override fun getX(): Double {
+        return length * Math.cos(angle)
+    }
+
+    override fun getY(): Double {
+        return length * Math.sin(angle)
+    }
+
     override fun add(v: Vector): Vector {
         val other = convertToPolar(v)
         val newLengt = Math.sqrt(
