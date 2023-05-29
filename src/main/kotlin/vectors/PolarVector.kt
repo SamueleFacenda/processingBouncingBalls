@@ -2,7 +2,7 @@ package vectors
 
 class PolarVector(
     private val length: Double,
-    private val angle: Double
+    val angle: Double
 ): Vector {
 
     override fun add(v: Vector): Vector {
