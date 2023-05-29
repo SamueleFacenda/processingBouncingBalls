@@ -47,7 +47,7 @@ class BallContainer(
         for (child in balls){
             for (other in balls){
                 if (child != other && !alreadyChecked.contains(Pair(child, other))){
-                    if (child.isCollidingWith(other)){
+                    if (child.willCollideWith(other)){
                         Ball.makeBounce(child, other)
                     }
                     alreadyChecked.add(Pair(child, other))

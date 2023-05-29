@@ -4,8 +4,8 @@ import balls.BallContainer
 import processing.core.PApplet
 
 object FirstSketch: PApplet() {
-    private val WIDTH = 800
-    private val HEIGHT = 600
+    private val WIDTH = 1000
+    private val HEIGHT = 800
 
 
     override fun settings() {
@@ -15,8 +15,8 @@ object FirstSketch: PApplet() {
     private val container = BallContainer(
         height = HEIGHT.toDouble(),
         width = WIDTH.toDouble(),
-        numberOfChild = 4,
-        numberOfLayer = 3,
+        numberOfChild = 5,
+        numberOfLayer = 2,
         sketch = this
     )
 

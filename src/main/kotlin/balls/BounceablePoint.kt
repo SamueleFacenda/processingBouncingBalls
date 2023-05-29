@@ -46,6 +46,15 @@ class BounceablePoint(
         return divideSpeed(s)
     }
 
+    fun multiplySpeed(s: Double): BounceablePoint {
+        val newSpeed = speed * s
+        return BounceablePoint(mass, newSpeed, x, y)
+    }
+
+    operator fun times(s: Double): BounceablePoint {
+        return multiplySpeed(s)
+    }
+
     fun withSpeed(v: Vector): BounceablePoint {
         return BounceablePoint(mass, v, x, y)
     }

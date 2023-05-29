@@ -24,15 +24,18 @@ class Ball(
     companion object{
         const val SMALL_RADIUS = 120.0
         const val OUTER_RADIUS_RATIO = 1.1
-        const val LAYER_RATIO = 5.1
+        const val LAYER_RATIO = 6.1
         const val MASS_RATIO_POWER = 6
+        const val DEBOUNCER = 5
+        const val BOUNCE_MULTIPLIER = 1.0
+        const val DECELERATION = 1.0
 
         fun makeBounce(one: Ball, two: Ball) {
             val oneNewSpeed = one.phisicReference.bounceOn(two.phisicReference)
             val twoNewSpeed = two.phisicReference.bounceOn(one.phisicReference)
 
-            one.phisicReference = oneNewSpeed
-            two.phisicReference = twoNewSpeed
+            one.phisicReference = oneNewSpeed * BOUNCE_MULTIPLIER
+            two.phisicReference = twoNewSpeed * BOUNCE_MULTIPLIER
 
             one.latestBouncesCounter[two] = 0
             two.latestBouncesCounter[one] = 0
@@ -89,12 +92,12 @@ class Ball(
         for (child in children){
             child.checkCollisionsAndUpdate()
 
-            if (child.isCollidingWith(this)){
+            if (child.willCollideWith(this)){
                 makeBounce(this, child)
             }
             for (other in children){
                 if (child != other && !alreadyChecked.contains(Pair(child, other))){
-                    if (child.isCollidingWith(other)){
+                    if (child.willCollideWith(other)){
                         makeBounce(child, other)
                     }
                     alreadyChecked.add(Pair(child, other))
@@ -108,7 +111,7 @@ class Ball(
         val iterator = latestBouncesCounter.iterator()
         while (iterator.hasNext()){
             val entry = iterator.next()
-            if (entry.value > 5){
+            if (entry.value > DEBOUNCER){
                 iterator.remove()
             } else {
                 latestBouncesCounter[entry.key] = entry.value + 1
@@ -116,19 +119,15 @@ class Ball(
         }
     }
 
-    fun isCollidingWith(other: Ball): Boolean{
-        if (other in latestBouncesCounter){
-            return false
-        }
-
-        when {
-            depth == other.depth -> return willCollidingWithBorderOF(other)
-            depth > other.depth -> return willCollidingInternallyWith(other)
-            else -> return other.willCollidingInternallyWith(this)
-        }
+    fun willCollideWith(other: Ball): Boolean{
+        return when {
+            depth == other.depth -> willCollideWithBorderOF(other)
+            depth > other.depth -> willCollideInternallyWith(other)
+            else -> other.willCollideInternallyWith(this)
+        } && !(other in latestBouncesCounter)
     }
 
-    private fun willCollidingWithBorderOF(other: Ball): Boolean{
+    private fun willCollideWithBorderOF(other: Ball): Boolean{
         val nextPosition = phisicReference.moveOfTime(1.0 / 60.0)
         val willCollide = Math.sqrt(Math.pow(nextPosition.x - other.x, 2.0) + Math.pow(nextPosition.y - other.y, 2.0)) < outerRadius + other.outerRadius
         if (willCollide) {
@@ -137,11 +136,11 @@ class Ball(
         return willCollide
     }
 
-    private fun willCollidingInternallyWith(other: Ball): Boolean{
+    private fun willCollideInternallyWith(other: Ball): Boolean{
         val nextPosition = phisicReference.moveOfTime(1.0 / 60.0)
         val willCollide = Math.sqrt(Math.pow(nextPosition.x - other.x, 2.0) + Math.pow(nextPosition.y - other.y, 2.0)) + outerRadius > other.innerRadius
         if (willCollide) {
-            nextCollisionsDirections.add(- Math.atan2(other.y - y, other.x - x))
+            nextCollisionsDirections.add( -Math.atan2(other.y - y, other.x - x))
         }
         return willCollide
     }
@@ -156,11 +155,18 @@ class Ball(
     }
 
     fun updateForwardOfTime(time: Double) {
-        val oldSpeed = phisicReference.speed
+        val oldSpeed = phisicReference.speed * DECELERATION
+        removeObstacledDirectionsFromSpeed()
 
-        // if there are collisions, we need to update the speed to block the movement in such directions
+        phisicReference = phisicReference.moveOfTime(time)
+        children.forEach { it.updateForwardOfTime(time) }
+
+        phisicReference = phisicReference.withSpeed(oldSpeed)
+    }
+
+    private fun removeObstacledDirectionsFromSpeed() {
         if (nextCollisionsDirections.isNotEmpty()){
-            var speedToUse = oldSpeed
+            var speedToUse = phisicReference.speed
             nextCollisionsDirections.forEach {
                 val speedInDirection = speedToUse.projectOnDirection(it)
                 speedToUse -= speedInDirection
@@ -168,12 +174,6 @@ class Ball(
             phisicReference = phisicReference.withSpeed(speedToUse)
             nextCollisionsDirections.clear()
         }
-
-        phisicReference = phisicReference.moveOfTime(time)
-        children.forEach { it.updateForwardOfTime(time) }
-
-        // restore the speed
-        phisicReference = phisicReference.withSpeed(oldSpeed)
     }
 
     fun checkForBounceOnBoundaryOf(width: Double, height: Double) {
@@ -225,7 +225,7 @@ class Ball(
 
     fun checkCollisionsWith(other: List<Ball>){
         for (ball in other){
-            if (isCollidingWith(ball)){
+            if (willCollideWith(ball)){
                 makeBounce(this, ball)
             }
         }
