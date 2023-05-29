@@ -11,9 +11,9 @@ class BallContainer(
     private val numberOfLayer: Int = 1,
     private val sketch: PApplet
 ) {
-    private val balls: List<Ball> = (1..numberOfChild).map { getNewBall(it) }
+    private val balls: List<Ball> = (1..numberOfChild).map { getNewBall() }
 
-    private fun getNewBall(index: Int): Ball{
+    private fun getNewBall(): Ball{
         return Ball(
             numberOfChildren = numberOfChild,
             layer = numberOfLayer,
