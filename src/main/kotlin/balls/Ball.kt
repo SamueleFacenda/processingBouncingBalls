@@ -96,4 +96,40 @@ class Ball(
 
         children.forEach { it.drawOn(sketch) }
     }
+
+    fun updateForwardOfTime(time: Double) {
+        phisicReference.moveOfTime(time)
+        children.forEach { it.updateForwardOfTime(time) }
+    }
+
+    fun checkForBounceOnBoundaryOf(width: Double, height: Double) {
+        checkUpperBoundary()
+        checkLowerBoundary(height)
+        checkLeftBoundary()
+        checkRightBoundary(width)
+    }
+
+    private fun checkUpperBoundary() {
+        if (y - outerRadius < 0) {
+            phisicReference = phisicReference.reverseY()
+        }
+    }
+
+    private fun checkLowerBoundary(height: Double) {
+        if (y + outerRadius > height) {
+            phisicReference = phisicReference.reverseY()
+        }
+    }
+
+    private fun checkLeftBoundary() {
+        if (x - outerRadius < 0) {
+            phisicReference = phisicReference.reverseX()
+        }
+    }
+
+    private fun checkRightBoundary(width: Double) {
+        if (x + outerRadius > width) {
+            phisicReference = phisicReference.reverseX()
+        }
+    }
 }

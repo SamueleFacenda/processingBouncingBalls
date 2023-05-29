@@ -1,5 +1,6 @@
 package balls
 
+import processing.core.PApplet
 import vectors.PolarVector
 import kotlin.random.Random
 
@@ -7,7 +8,8 @@ class BallContainer(
     private val height: Double = 0.0,
     private val width: Double = 0.0,
     private val numberOfChild: Int = 1,
-    private val numberOfLayer: Int = 1
+    private val numberOfLayer: Int = 1,
+    private val sketch: PApplet
 ) {
     private val balls: List<Ball> = (1..numberOfChild).map { getNewBall(it) }
 
@@ -22,5 +24,14 @@ class BallContainer(
                 Random.nextDouble(0.0, 2 * Math.PI)
             )
         )
+    }
+
+    fun update(){
+        balls.forEach { it.updateForwardOfTime(1 / sketch.frameRate.toDouble()) }
+        balls.forEach { it.checkForBounceOnBoundaryOf(width, height) }
+    }
+
+    fun draw(){
+        balls.forEach { it.drawOn(sketch) }
     }
 }

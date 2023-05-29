@@ -73,4 +73,14 @@ class BounceablePoint(
 
         return BounceablePoint(mass, newSpeed, x, y)
     }
+
+    fun reverseX(): BounceablePoint {
+        val newSpeed = CartesianVector(-speed.getX(), speed.getY())
+        return BounceablePoint(mass, newSpeed, x, y)
+    }
+
+    fun reverseY(): BounceablePoint {
+        val newSpeed = CartesianVector(speed.getX(), -speed.getY())
+        return BounceablePoint(mass, newSpeed, x, y)
+    }
 }
