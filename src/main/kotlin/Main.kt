@@ -1,3 +1,6 @@
+import processing.core.PApplet
+import sketches.FirstSketch
+
 fun main(args: Array<String>) {
-    val sketch
+    PApplet.runSketch(arrayOf("FirstSketch"), FirstSketch())
 }
