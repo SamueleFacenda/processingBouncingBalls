@@ -2,6 +2,7 @@ package balls
 
 import processing.core.PApplet
 import vectors.CartesianVector
+import vectors.PolarVector
 import vectors.Vector
 import kotlin.random.Random
 import kotlin.reflect.KProperty
@@ -122,8 +123,8 @@ class Ball(
     fun willCollideWith(other: Ball): Boolean{
         return when {
             depth == other.depth -> willCollideWithBorderOF(other)
-            depth > other.depth -> willCollideInternallyWith(other)
-            else -> other.willCollideInternallyWith(this)
+            depth > other.depth -> willCollideWithInsideOf(other)
+            else -> other.willCollideWithInsideOf(this)
         } && !(other in latestBouncesCounter)
     }
 
@@ -136,13 +137,21 @@ class Ball(
         return willCollide
     }
 
-    private fun willCollideInternallyWith(other: Ball): Boolean{
+    private fun willCollideWithInsideOf(other: Ball): Boolean{
         val nextPosition = phisicReference.moveOfTime(1.0 / 60.0)
         val willCollide = Math.sqrt(Math.pow(nextPosition.x - other.x, 2.0) + Math.pow(nextPosition.y - other.y, 2.0)) + outerRadius > other.innerRadius
         if (willCollide) {
             nextCollisionsDirections.add(-Math.atan2(other.y - y, other.x - x))
         }
         return willCollide
+    }
+
+    private fun isCollidingInternallyWith(other: Ball): Boolean{
+        if (depth != other.depth - 1){
+            throw IllegalArgumentException("Cannot check collision between balls of depth $depth and ${other.depth}")
+        }
+
+        return Math.sqrt(Math.pow(other.x - x, 2.0) + Math.pow(other.y - y, 2.0)) + other.outerRadius < innerRadius
     }
 
     fun drawOn(sketch: PApplet) {
@@ -156,12 +165,13 @@ class Ball(
 
     fun updateForwardOfTime(time: Double) {
         val oldSpeed = phisicReference.speed * DECELERATION
-        removeObstacledDirectionsFromSpeed()
+        // removeObstacledDirectionsFromSpeed()
 
-        phisicReference = phisicReference.moveOfTime(time)
         children.forEach { it.updateForwardOfTime(time) }
+        phisicReference = phisicReference.moveOfTime(time)
 
         phisicReference = phisicReference.withSpeed(oldSpeed)
+        carryOnChildren()
     }
 
     private fun removeObstacledDirectionsFromSpeed() {
@@ -174,6 +184,23 @@ class Ball(
             phisicReference = phisicReference.withSpeed(speedToUse)
             nextCollisionsDirections.clear()
         }
+    }
+
+    private fun carryOnChildren(){
+        children.forEach {
+            if (isCollidingInternallyWith(it)){
+                carryOnChild(it)
+            }
+        }
+    }
+
+    private fun carryOnChild(child: Ball){
+        val direction = Math.atan2(y - child.y, x - child.x)
+        val wantedDistance = innerRadius - child.outerRadius
+        val distance = Math.sqrt(Math.pow(x - child.x, 2.0) + Math.pow(y - child.y, 2.0))
+        val distanceToMove = wantedDistance - distance
+
+        child.phisicReference = child.phisicReference.moveOf(PolarVector(distanceToMove, direction))
     }
 
     fun checkForBounceOnBoundaryOf(width: Double, height: Double) {
