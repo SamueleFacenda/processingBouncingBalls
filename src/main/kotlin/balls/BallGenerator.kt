@@ -1,5 +1,7 @@
 package balls
 
+import kotlin.math.pow
+import kotlin.math.sqrt
 import kotlin.random.Random
 
 class BallGenerator(
@@ -43,12 +45,12 @@ class BallGenerator(
     }
 
     private fun canFit(x: Double, y: Double): Boolean{
-        if (isCircle && Math.sqrt(Math.pow(x - this.x, 2.0) + Math.pow(y - this.y, 2.0)) + radius > width){
+        if (isCircle && sqrt((x - this.x).pow(2.0) + (y - this.y).pow(2.0)) + radius > width){
             return false
         }
 
         for (ball in balls){
-            if (Math.sqrt(Math.pow(x - ball.first, 2.0) + Math.pow(y - ball.second, 2.0)) < radius * 2){
+            if (sqrt((x - ball.first).pow(2.0) + (y - ball.second).pow(2.0)) < radius * 2){
                 return false
             }
         }

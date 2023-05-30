@@ -1,16 +1,21 @@
 package vectors
 
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
+
 class PolarVector(
     private val length: Double,
-    val angle: Double
+    private val angle: Double
 ): Vector {
 
     override fun getX(): Double {
-        return length * Math.cos(angle)
+        return length * cos(angle)
     }
 
     override fun getY(): Double {
-        return length * Math.sin(angle)
+        return length * sin(angle)
     }
 
     override fun getLength(): Double {
@@ -19,16 +24,16 @@ class PolarVector(
 
     override fun add(v: Vector): Vector {
         val other = convertToPolar(v)
-        val newLengt = Math.sqrt(
+        val newLength = sqrt(
             length * length +
             other.length * other.length +
-            2 * length * other.length * Math.cos(angle - other.angle)
+            2 * length * other.length * cos(angle - other.angle)
         )
-        val newAngle = angle + Math.atan2(
-            other.length * Math.sin(other.angle - angle),
-            length + other.length * Math.cos(other.angle - angle)
+        val newAngle = angle + atan2(
+            other.length * sin(other.angle - angle),
+            length + other.length * cos(other.angle - angle)
         )
-        return PolarVector(newLengt, newAngle)
+        return PolarVector(newLength, newAngle)
     }
 
     override fun subtract(v: Vector): Vector {
@@ -46,8 +51,8 @@ class PolarVector(
     }
 
     fun toCartesianVector(): CartesianVector {
-        val x = length * Math.cos(angle)
-        val y = length * Math.sin(angle)
+        val x = length * cos(angle)
+        val y = length * sin(angle)
         return CartesianVector(x, y)
     }
 
@@ -61,6 +66,6 @@ class PolarVector(
 
     override fun projectOnDirection(dir: Double): Vector {
         val newAngle = angle - dir
-        return PolarVector(length * Math.cos(newAngle), newAngle)
+        return PolarVector(length * cos(newAngle), newAngle)
     }
 }

@@ -1,5 +1,8 @@
 package vectors
 
+import kotlin.math.atan2
+import kotlin.math.sqrt
+
 
 class CartesianVector(
     private val x: Double,
@@ -37,8 +40,8 @@ class CartesianVector(
     }
 
     fun toPolarVector(): PolarVector {
-        val length = Math.sqrt(x * x + y * y)
-        val angle = Math.atan2(y, x)
+        val length = sqrt(x * x + y * y)
+        val angle = atan2(y, x)
         return PolarVector(length, angle)
     }
 

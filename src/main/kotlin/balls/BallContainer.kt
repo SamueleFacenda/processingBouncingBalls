@@ -35,13 +35,13 @@ class BallContainer(
     }
 
     fun update(){
-        checkForChildrenCollissions()
+        checkForChildrenCollisions()
         balls.forEach { it.checkCollisionsAndUpdate() }
         balls.forEach { it.updateForwardOfTime(1.0 / sketch.frameRate.toDouble()) }
         balls.forEach { it.checkForBounceOnBoundaryOf(width, height) }
     }
 
-    private fun checkForChildrenCollissions() {
+    private fun checkForChildrenCollisions() {
         val alreadyChecked = mutableSetOf<Pair<Ball, Ball>>()
 
         for (child in balls){

@@ -4,6 +4,9 @@ import processing.core.PApplet
 import vectors.CartesianVector
 import vectors.PolarVector
 import vectors.Vector
+import kotlin.math.atan2
+import kotlin.math.pow
+import kotlin.math.sqrt
 import kotlin.random.Random
 import kotlin.reflect.KProperty
 
@@ -15,7 +18,7 @@ class Ball(
     val startY: Double = 0.0,
     val startSpeed: Vector = CartesianVector(0.0, 0.0)
 ) {
-    private var phisicReference: BounceablePoint = BounceablePoint(
+    private var physicReference: BounceablePoint = BounceablePoint(
         ((1 shl (maxDepth * MASS_RATIO_POWER)) shr (depth * MASS_RATIO_POWER)).toDouble(), // higher layer balls are heavier
         startSpeed,
         startX,
@@ -23,27 +26,27 @@ class Ball(
     )
 
     companion object{
-        const val SMALL_RADIUS = 180.0
-        const val OUTER_RADIUS_RATIO = 1.1
+        private const val SMALL_RADIUS = 180.0
+        private const val OUTER_RADIUS_RATIO = 1.1
         const val LAYER_RATIO = 4.5
         const val MASS_RATIO_POWER = 6
         const val DEBOUNCER = 5
-        const val BOUNCE_MULTIPLIER = 1.0
+        private const val BOUNCE_MULTIPLIER = 1.0
         const val DECELERATION = 0.997
 
         fun makeBounce(one: Ball, two: Ball) {
-            val oneNewSpeed = one.phisicReference.bounceOn(two.phisicReference)
-            val twoNewSpeed = two.phisicReference.bounceOn(one.phisicReference)
+            val oneNewSpeed = one.physicReference.bounceOn(two.physicReference)
+            val twoNewSpeed = two.physicReference.bounceOn(one.physicReference)
 
-            one.phisicReference = oneNewSpeed * BOUNCE_MULTIPLIER
-            two.phisicReference = twoNewSpeed * BOUNCE_MULTIPLIER
+            one.physicReference = oneNewSpeed * BOUNCE_MULTIPLIER
+            two.physicReference = twoNewSpeed * BOUNCE_MULTIPLIER
 
             one.latestBouncesCounter[two] = 0
             two.latestBouncesCounter[one] = 0
         }
 
         fun getInnerRadiusForDepth(depth: Int): Double{
-            return SMALL_RADIUS * Math.pow(LAYER_RATIO, -depth.toDouble())
+            return SMALL_RADIUS * LAYER_RATIO.pow(-depth.toDouble())
         }
 
         fun getOuterRadiusForDepth(depth: Int): Double{
@@ -58,9 +61,9 @@ class Ball(
     private val y: Double by this
 
     operator fun getValue(ball: Ball, property: KProperty<*>): Double {
-        when (property.name) {
-            "x" -> return phisicReference.x
-            "y" -> return phisicReference.y
+        return when (property.name) {
+            "x" -> physicReference.x
+            "y" -> physicReference.y
             else -> throw IllegalArgumentException("Unknown property ${property.name}")
         }
     }
@@ -79,7 +82,7 @@ class Ball(
             maxDepth = maxDepth,
             startX = it.first,
             startY = it.second,
-            startSpeed = phisicReference.speed / Math.pow(LAYER_RATIO, depth.toDouble() + 1) * Random.nextDouble(0.5, 1.2)
+            startSpeed = physicReference.speed / LAYER_RATIO.pow(depth.toDouble() + 1) * Random.nextDouble(0.5, 1.2)
         )
     }
 
@@ -125,23 +128,23 @@ class Ball(
             depth == other.depth -> willCollideWithBorderOF(other)
             depth > other.depth -> willCollideWithInsideOf(other)
             else -> other.willCollideWithInsideOf(this)
-        } && !(other in latestBouncesCounter)
+        } && other !in latestBouncesCounter
     }
 
     private fun willCollideWithBorderOF(other: Ball): Boolean{
-        val nextPosition = phisicReference.moveOfTime(1.0 / 60.0)
-        val willCollide = Math.sqrt(Math.pow(nextPosition.x - other.x, 2.0) + Math.pow(nextPosition.y - other.y, 2.0)) < outerRadius + other.outerRadius
+        val nextPosition = physicReference.moveOfTime(1.0 / 60.0)
+        val willCollide = sqrt((nextPosition.x - other.x).pow(2.0) + (nextPosition.y - other.y).pow(2.0)) < outerRadius + other.outerRadius
         if (willCollide) {
-            nextCollisionsDirections.add(Math.atan2(other.y - y, other.x - x))
+            nextCollisionsDirections.add(atan2(other.y - y, other.x - x))
         }
         return willCollide
     }
 
     private fun willCollideWithInsideOf(other: Ball): Boolean{
-        val nextPosition = phisicReference.moveOfTime(1.0 / 60.0)
-        val willCollide = Math.sqrt(Math.pow(nextPosition.x - other.x, 2.0) + Math.pow(nextPosition.y - other.y, 2.0)) + outerRadius > other.innerRadius
+        val nextPosition = physicReference.moveOfTime(1.0 / 60.0)
+        val willCollide = sqrt((nextPosition.x - other.x).pow(2.0) + (nextPosition.y - other.y).pow(2.0)) + outerRadius > other.innerRadius
         if (willCollide) {
-            nextCollisionsDirections.add(-Math.atan2(other.y - y, other.x - x))
+            nextCollisionsDirections.add(-atan2(other.y - y, other.x - x))
         }
         return willCollide
     }
@@ -151,7 +154,7 @@ class Ball(
             throw IllegalArgumentException("Cannot check inner collision between balls of depth $depth and ${other.depth}")
         }
 
-        return Math.sqrt(Math.pow(other.x - x, 2.0) + Math.pow(other.y - y, 2.0)) + other.outerRadius > innerRadius
+        return sqrt((other.x - x).pow(2.0) + (other.y - y).pow(2.0)) + other.outerRadius > innerRadius
     }
 
     private fun isCollidingWithBorderOf(other: Ball): Boolean{
@@ -159,7 +162,7 @@ class Ball(
             throw IllegalArgumentException("Cannot check outer collision between balls of depth $depth and ${other.depth}")
         }
 
-        return Math.sqrt(Math.pow(other.x - x, 2.0) + Math.pow(other.y - y, 2.0)) < outerRadius + other.outerRadius
+        return sqrt((other.x - x).pow(2.0) + (other.y - y).pow(2.0)) < outerRadius + other.outerRadius
     }
 
     fun drawOn(sketch: PApplet) {
@@ -172,25 +175,25 @@ class Ball(
     }
 
     fun updateForwardOfTime(time: Double) {
-        val oldSpeed = phisicReference.speed * Math.pow(DECELERATION, if (depth <= 1) 0.0 else depth.toDouble() - 1)
-        // removeObstacledDirectionsFromSpeed()
+        val oldSpeed = physicReference.speed * DECELERATION.pow(if (depth <= 1) 0.0 else depth.toDouble() - 1)
+        // removeObstacleDirectionsFromSpeed()
 
-        phisicReference = phisicReference.moveOfTime(time)
+        physicReference = physicReference.moveOfTime(time)
         carryOnChildren()
         children.forEach { it.updateForwardOfTime(time) }
         carryOnChildren()
 
-        phisicReference = phisicReference.withSpeed(oldSpeed)
+        physicReference = physicReference.withSpeed(oldSpeed)
     }
 
-    private fun removeObstacledDirectionsFromSpeed() {
+    private fun removeObstacleDirectionsFromSpeed() {
         if (nextCollisionsDirections.isNotEmpty()){
-            var speedToUse = phisicReference.speed
+            var speedToUse = physicReference.speed
             nextCollisionsDirections.forEach {
                 val speedInDirection = speedToUse.projectOnDirection(it)
                 speedToUse -= speedInDirection
             }
-            phisicReference = phisicReference.withSpeed(speedToUse)
+            physicReference = physicReference.withSpeed(speedToUse)
             nextCollisionsDirections.clear()
         }
     }
@@ -205,12 +208,12 @@ class Ball(
     }
 
     private fun carryOnChild(child: Ball){
-        val direction = Math.atan2(child.y - y, child.x - x)
+        val direction = atan2(child.y - y, child.x - x)
         val wantedDistance = innerRadius - child.outerRadius
-        val distance = Math.sqrt(Math.pow(x - child.x, 2.0) + Math.pow(y - child.y, 2.0))
+        val distance = sqrt((x - child.x).pow(2.0) + (y - child.y).pow(2.0))
         val distanceToMove = wantedDistance - distance
 
-        child.phisicReference = child.phisicReference.moveOf(PolarVector(distanceToMove, direction))
+        child.physicReference = child.physicReference.moveOf(PolarVector(distanceToMove, direction))
     }
 
     fun checkForBounceOnBoundaryOf(width: Double, height: Double) {
@@ -222,48 +225,40 @@ class Ball(
 
     private fun checkUpperBoundary() {
         if (y - outerRadius < 0) {
-            if (phisicReference.speed.getY() < 0.0) {
-                phisicReference = phisicReference.reverseY()
+            if (physicReference.speed.getY() < 0.0) {
+                physicReference = physicReference.reverseY()
             } else {
-                phisicReference += CartesianVector(0.0, 0.1)
+                physicReference += CartesianVector(0.0, 0.1)
             }
         }
     }
 
     private fun checkLowerBoundary(height: Double) {
         if (y + outerRadius > height) {
-            if (phisicReference.speed.getY() > 0.0) {
-                phisicReference = phisicReference.reverseY()
+            if (physicReference.speed.getY() > 0.0) {
+                physicReference = physicReference.reverseY()
             } else {
-                phisicReference += CartesianVector(0.0, -0.1)
+                physicReference += CartesianVector(0.0, -0.1)
             }
         }
     }
 
     private fun checkLeftBoundary() {
         if (x - outerRadius < 0) {
-            if (phisicReference.speed.getX() < 0.0) {
-                phisicReference = phisicReference.reverseX()
+            if (physicReference.speed.getX() < 0.0) {
+                physicReference = physicReference.reverseX()
             } else {
-                phisicReference += CartesianVector(0.1, 0.0)
+                physicReference += CartesianVector(0.1, 0.0)
             }
         }
     }
 
     private fun checkRightBoundary(width: Double) {
         if (x + outerRadius > width) {
-            if (phisicReference.speed.getX() > 0.0) {
-                phisicReference = phisicReference.reverseX()
+            if (physicReference.speed.getX() > 0.0) {
+                physicReference = physicReference.reverseX()
             } else {
-                phisicReference += CartesianVector(-0.1, 0.0)
-            }
-        }
-    }
-
-    fun checkCollisionsWith(other: List<Ball>){
-        for (ball in other){
-            if (willCollideWith(ball)){
-                makeBounce(this, ball)
+                physicReference += CartesianVector(-0.1, 0.0)
             }
         }
     }

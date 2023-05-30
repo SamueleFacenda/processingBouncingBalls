@@ -1,5 +1,7 @@
 package vectors
 
+import kotlin.math.sqrt
+
 interface Vector {
     fun add(v: Vector): Vector
     fun subtract(v: Vector): Vector
@@ -8,7 +10,7 @@ interface Vector {
     fun getX(): Double
     fun getY(): Double
     fun getLength(): Double {
-        return Math.sqrt(getX() * getX() + getY() * getY())
+        return sqrt(getX() * getX() + getY() * getY())
     }
     fun projectOnDirection(dir: Double): Vector
 
