@@ -23,13 +23,13 @@ class Ball(
     )
 
     companion object{
-        const val SMALL_RADIUS = 120.0
+        const val SMALL_RADIUS = 180.0
         const val OUTER_RADIUS_RATIO = 1.1
-        const val LAYER_RATIO = 6.1
+        const val LAYER_RATIO = 4.5
         const val MASS_RATIO_POWER = 6
         const val DEBOUNCER = 5
         const val BOUNCE_MULTIPLIER = 1.0
-        const val DECELERATION = 1.0
+        const val DECELERATION = 0.997
 
         fun makeBounce(one: Ball, two: Ball) {
             val oneNewSpeed = one.phisicReference.bounceOn(two.phisicReference)
@@ -148,10 +148,18 @@ class Ball(
 
     private fun isCollidingInternallyWith(other: Ball): Boolean{
         if (depth != other.depth - 1){
-            throw IllegalArgumentException("Cannot check collision between balls of depth $depth and ${other.depth}")
+            throw IllegalArgumentException("Cannot check inner collision between balls of depth $depth and ${other.depth}")
         }
 
-        return Math.sqrt(Math.pow(other.x - x, 2.0) + Math.pow(other.y - y, 2.0)) + other.outerRadius < innerRadius
+        return Math.sqrt(Math.pow(other.x - x, 2.0) + Math.pow(other.y - y, 2.0)) + other.outerRadius > innerRadius
+    }
+
+    private fun isCollidingWithBorderOf(other: Ball): Boolean{
+        if (depth != other.depth){
+            throw IllegalArgumentException("Cannot check outer collision between balls of depth $depth and ${other.depth}")
+        }
+
+        return Math.sqrt(Math.pow(other.x - x, 2.0) + Math.pow(other.y - y, 2.0)) < outerRadius + other.outerRadius
     }
 
     fun drawOn(sketch: PApplet) {
@@ -164,14 +172,15 @@ class Ball(
     }
 
     fun updateForwardOfTime(time: Double) {
-        val oldSpeed = phisicReference.speed * DECELERATION
+        val oldSpeed = phisicReference.speed * Math.pow(DECELERATION, if (depth <= 1) 0.0 else depth.toDouble() - 1)
         // removeObstacledDirectionsFromSpeed()
 
-        children.forEach { it.updateForwardOfTime(time) }
         phisicReference = phisicReference.moveOfTime(time)
+        carryOnChildren()
+        children.forEach { it.updateForwardOfTime(time) }
+        carryOnChildren()
 
         phisicReference = phisicReference.withSpeed(oldSpeed)
-        carryOnChildren()
     }
 
     private fun removeObstacledDirectionsFromSpeed() {
@@ -190,12 +199,13 @@ class Ball(
         children.forEach {
             if (isCollidingInternallyWith(it)){
                 carryOnChild(it)
+                it.carryOnChildren()
             }
         }
     }
 
     private fun carryOnChild(child: Ball){
-        val direction = Math.atan2(y - child.y, x - child.x)
+        val direction = Math.atan2(child.y - y, child.x - x)
         val wantedDistance = innerRadius - child.outerRadius
         val distance = Math.sqrt(Math.pow(x - child.x, 2.0) + Math.pow(y - child.y, 2.0))
         val distanceToMove = wantedDistance - distance

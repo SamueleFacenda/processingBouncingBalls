@@ -15,8 +15,8 @@ object FirstSketch: PApplet() {
     private val container = BallContainer(
         height = HEIGHT.toDouble(),
         width = WIDTH.toDouble(),
-        numberOfChild = 5,
-        numberOfLayer = 3,
+        numberOfChild = 3,
+        numberOfLayer = 4,
         sketch = this
     )
 
