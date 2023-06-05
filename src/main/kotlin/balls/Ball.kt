@@ -4,9 +4,9 @@ import balls.childCarrier.BallsCarryCalculator
 import balls.childCarrier.BruteInsideCarryCalculator
 import processing.core.PApplet
 import vectors.CartesianVector
+import vectors.PolarVector
 import vectors.Vector
-import kotlin.math.pow
-import kotlin.math.sqrt
+import kotlin.math.*
 import kotlin.random.Random
 import kotlin.reflect.KProperty
 
@@ -26,7 +26,7 @@ class Ball(
     )
 
     companion object{
-        private const val SMALL_RADIUS = 180.0
+        private const val SMALL_RADIUS = 160.0
         private const val OUTER_RADIUS_RATIO = 1.1
         const val LAYER_RATIO = 4.5
         const val MASS_RATIO_POWER = 6
@@ -111,15 +111,7 @@ class Ball(
     }
 
     fun needToBounceWith(other: Ball): Boolean{
-        var out = willCollideWith(other)
-        if (out) {
-            out = bounceInProgress.add(other)
-            println("Bounce in progress($out) for $this, other: $other")
-        } else {
-            val contained = bounceInProgress.remove(other)
-            if (contained) println("contained for $this, other: $other")
-        }
-        return out
+        return willCollideWith(other) && isConvergentWith(other)
     }
 
     private fun willCollideWith(other: Ball): Boolean {
@@ -164,11 +156,29 @@ class Ball(
         return sqrt((other.x - x).pow(2.0) + (other.y - y).pow(2.0)) < outerRadius + other.outerRadius
     }
 
+    private fun isConvergentWith(other: Ball): Boolean{
+        return when {
+            depth == other.depth -> isConvergentWithCenterOf(other)
+            depth > other.depth -> isConvergentWithInternalBorderOf(other)
+            else -> other.isConvergentWithInternalBorderOf(this)
+        }
+    }
+
+    private fun isConvergentWithCenterOf(other: Ball): Boolean {
+        return physicReference.isConvergentOn(other.physicReference)
+    }
+
+    private fun isConvergentWithInternalBorderOf(other: Ball): Boolean {
+        val otherDirection = atan2(y - other.y, x - other.x)
+        val otherReference = other.physicReference.moveOf(PolarVector(other.innerRadius, otherDirection))
+        return physicReference.isConvergentOn(otherReference)
+    }
+
     fun drawOn(sketch: PApplet) {
-        sketch.fill(0)
-        sketch.ellipse(x.toFloat(), y.toFloat(), (outerRadius * 2).toFloat(), (outerRadius * 2).toFloat())
-        sketch.fill(255)
-        sketch.ellipse(x.toFloat(), y.toFloat(), (innerRadius * 2).toFloat(), (innerRadius * 2).toFloat())
+        sketch.stroke(0)
+        sketch.strokeWeight(10.toFloat() / LAYER_RATIO.pow(depth.toDouble()).toFloat())
+        sketch.noFill()
+        sketch.circle(x.toFloat(), y.toFloat(), (outerRadius * 2).toFloat())
 
         children.forEach { it.drawOn(sketch) }
     }
