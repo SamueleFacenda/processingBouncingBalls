@@ -14,6 +14,10 @@ class BallGenerator(
     private val isCircle: Boolean = true
 ) {
 
+    companion object{
+        private const val MAX_TRIES = 1000
+    }
+
 
     private val balls = mutableListOf<Pair<Double, Double>>()
     init {
@@ -32,9 +36,9 @@ class BallGenerator(
                 tmpX = x + Random.nextDouble(-width/2 + radius, width/2 - radius)
                 tmpY = y + Random.nextDouble(-height/2 + radius, height/2 - radius)
                 numberOfTries++
-            } while (!canFit(tmpX, tmpY) && numberOfTries < 1000)
+            } while (!canFit(tmpX, tmpY) && numberOfTries < MAX_TRIES)
 
-            if (numberOfTries >= 1000){
+            if (numberOfTries >= MAX_TRIES){
                 return false
             }
 
@@ -45,7 +49,7 @@ class BallGenerator(
     }
 
     private fun canFit(x: Double, y: Double): Boolean{
-        if (isCircle && sqrt((x - this.x).pow(2.0) + (y - this.y).pow(2.0)) + radius > width){
+        if (isCircle && sqrt((x - this.x).pow(2.0) + (y - this.y).pow(2.0)) + radius > width/2){
             return false
         }
 

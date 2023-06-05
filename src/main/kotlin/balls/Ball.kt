@@ -73,8 +73,8 @@ class Ball(
         x,
         y,
         getOuterRadiusForDepth(depth + 1),
-        innerRadius,
-        innerRadius
+        innerRadius * 2,
+        innerRadius * 2
     ).getBalls().map {
         Ball(
             numberOfChildren = numberOfChildren,
