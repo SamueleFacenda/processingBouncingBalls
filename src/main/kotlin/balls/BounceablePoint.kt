@@ -84,6 +84,13 @@ class BounceablePoint(
         return this + PolarVector(thisFinalSpeed, impactDirection) - PolarVector(thisSpeed, impactDirection)
     }
 
+    fun areConvergent(other: BounceablePoint): Boolean {
+        val impactDirection = atan2(other.y - y, other.x - x)
+        val thisSpeed = speed.getProjectOn(impactDirection).getLength()
+        val otherSpeed = other.speed.getProjectOn(impactDirection).getLength()
+        return thisSpeed > otherSpeed
+    }
+
     operator fun getValue(ball: Ball, property: KProperty<*>): Double {
         return when (property.name) {
             "x" -> x
