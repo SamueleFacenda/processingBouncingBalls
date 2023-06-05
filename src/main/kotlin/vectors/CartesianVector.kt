@@ -53,7 +53,7 @@ class CartesianVector(
         }
     }
 
-    override fun projectOnDirection(dir: Double): Vector {
-        return toPolarVector().projectOnDirection(dir)
+    override fun getProjectOn(dir: Double): Vector {
+        return toPolarVector().getProjectOn(dir)
     }
 }

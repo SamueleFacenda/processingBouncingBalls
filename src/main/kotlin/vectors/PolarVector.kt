@@ -64,7 +64,7 @@ class PolarVector(
         }
     }
 
-    override fun projectOnDirection(dir: Double): Vector {
+    override fun getProjectOn(dir: Double): Vector {
         val newAngle = angle - dir
         return PolarVector(length * cos(newAngle), newAngle)
     }
