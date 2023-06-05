@@ -5,8 +5,8 @@ import processing.core.PApplet
 
 private const val WIDTH = 1000
 private const val HEIGHT = 800
-private const val NUMBER_OF_CHILD = 4
-private const val NUMBER_OF_LAYER = 3
+private const val NUMBER_OF_CHILD = 6
+private const val NUMBER_OF_LAYER = 4
 
 object FirstSketch: PApplet() {
 

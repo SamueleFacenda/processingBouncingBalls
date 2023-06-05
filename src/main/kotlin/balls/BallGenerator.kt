@@ -5,6 +5,7 @@ import kotlin.math.sqrt
 import kotlin.random.Random
 
 private const val MAX_TRIES = 1000
+private const val MAX_NEW_LIST_RETRIES = 30
 
 class BallGenerator(
     private val numberOfBalls: Int,
@@ -13,17 +14,34 @@ class BallGenerator(
     private val radius: Double,
     private val width: Double,
     private val height: Double,
-    private val isCircle: Boolean = true
+    private val isCircle: Boolean = true,
+    keepBest: Boolean = true
 ) {
 
     private val balls = mutableListOf<Pair<Double, Double>>()
     init {
-        while (!populateList()){
+        val bestBalls = mutableListOf<Pair<Double, Double>>()
+        var i = 0
+        while(i < MAX_NEW_LIST_RETRIES && !tryToPopulateList()){
+            if (keepBest && balls.size > bestBalls.size){
+                bestBalls.clear()
+                bestBalls.addAll(balls)
+            }
             balls.clear()
+            i++
         }
+
+        if (i == MAX_NEW_LIST_RETRIES) {
+            if (keepBest){
+                balls.addAll(bestBalls)
+            } else {
+                throw Exception("Could not generate a list of balls, even after $MAX_NEW_LIST_RETRIES tries")
+            }
+        }
+
     }
 
-    private fun populateList(): Boolean{
+    private fun tryToPopulateList(): Boolean{
         var tmpX: Double
         var tmpY: Double
         var numberOfTries: Int
