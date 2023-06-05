@@ -1,10 +1,9 @@
 package balls
 
 import balls.childCarrier.BallsCarryCalculator
-import balls.childCarrier.BruteInsideCarrier
+import balls.childCarrier.BruteInsideCarryCalculator
 import processing.core.PApplet
 import vectors.CartesianVector
-import vectors.PolarVector
 import vectors.Vector
 import kotlin.math.atan2
 import kotlin.math.pow
@@ -91,7 +90,7 @@ class Ball(
     private val latestBouncesCounter = mutableMapOf<Ball, Int>()
     private val nextCollisionsDirections = mutableSetOf<Double>()
 
-    private val carryCalculator: BallsCarryCalculator = BruteInsideCarrier(children, this)
+    private val carryCalculator: BallsCarryCalculator = BruteInsideCarryCalculator(children, this)
 
     fun checkCollisionsAndUpdate(){
         updateDebouncerMap()

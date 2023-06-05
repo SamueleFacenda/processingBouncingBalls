@@ -6,22 +6,22 @@ import vectors.PolarVector
 import vectors.Vector
 import kotlin.math.*
 
-class BruteInsideCarrier(balls: List<Ball>, parent: Ball): BallsCarryCalculator(balls, parent) {
+class BruteInsideCarryCalculator(balls: List<Ball>, parent: Ball): BallsCarryCalculator(balls, parent) {
 
-    private var ballsPositions = mutableMapOf<Ball, Vector>()
+    private var ballsMovements = mutableMapOf<Ball, Vector>()
 
     override fun computeRepositioningOfChildrenInParent(): Map<Ball, Vector> {
-        ballsPositions.clear()
+        ballsMovements.clear()
 
         balls.forEach {
             if (parent.isCollidingInternallyWith(it)) {
-                ballsPositions[it] = getCarriedPosition(it)
+                ballsMovements[it] = getCarriedPosition(it)
             } else {
-                ballsPositions[it] = CartesianVector(0.0, 0.0)
+                ballsMovements[it] = CartesianVector(0.0, 0.0)
             }
         }
 
-        return ballsPositions
+        return ballsMovements
     }
 
     private fun getCarriedPosition(child: Ball): Vector {
