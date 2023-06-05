@@ -4,6 +4,8 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.random.Random
 
+private const val MAX_TRIES = 1000
+
 class BallGenerator(
     private val numberOfBalls: Int,
     private val x: Double,
@@ -13,11 +15,6 @@ class BallGenerator(
     private val height: Double,
     private val isCircle: Boolean = true
 ) {
-
-    companion object{
-        private const val MAX_TRIES = 1000
-    }
-
 
     private val balls = mutableListOf<Pair<Double, Double>>()
     init {

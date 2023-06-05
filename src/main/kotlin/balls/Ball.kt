@@ -10,6 +10,17 @@ import kotlin.math.*
 import kotlin.random.Random
 import kotlin.reflect.KProperty
 
+private const val COLOR = 0
+private const val SMALL_RADIUS = 160.0
+private const val OUTER_RADIUS_RATIO = 1.1
+private const val LAYER_RATIO = 4.5
+private const val MASS_RATIO_POWER = 6
+private const val BOUNCE_MULTIPLIER = 1.0
+private const val DECELERATION = 0.997
+
+private const val CHECK_FUTURE_COLLISIONS = true
+
+
 class Ball(
     private val numberOfChildren: Int = 0,
     private val depth: Int = 0,
@@ -24,31 +35,6 @@ class Ball(
         startX,
         startY
     )
-
-    companion object{
-        private const val SMALL_RADIUS = 160.0
-        private const val OUTER_RADIUS_RATIO = 1.1
-        const val LAYER_RATIO = 4.5
-        const val MASS_RATIO_POWER = 6
-        private const val BOUNCE_MULTIPLIER = 1.0
-        const val DECELERATION = 0.997
-
-        fun makeBounce(one: Ball, two: Ball) {
-            val oneNewSpeed = one.physicReference.bounceOn(two.physicReference)
-            val twoNewSpeed = two.physicReference.bounceOn(one.physicReference)
-
-            one.physicReference = oneNewSpeed * BOUNCE_MULTIPLIER
-            two.physicReference = twoNewSpeed * BOUNCE_MULTIPLIER
-        }
-
-        fun getInnerRadiusForDepth(depth: Int): Double{
-            return SMALL_RADIUS * LAYER_RATIO.pow(-depth.toDouble())
-        }
-
-        fun getOuterRadiusForDepth(depth: Int): Double{
-            return getInnerRadiusForDepth(depth) * OUTER_RADIUS_RATIO
-        }
-    }
 
     val innerRadius = getInnerRadiusForDepth(depth)
     val outerRadius = getOuterRadiusForDepth(depth)
@@ -82,9 +68,26 @@ class Ball(
         )
     }
 
-    private val bounceInProgress: MutableSet<Ball> = HashSet()
     private val carryCalculator: BallsCarryCalculator = BruteInsideCarryCalculator(children, this)
     private val alreadyCheckedPairs: MutableSet<Pair<Ball, Ball>> = HashSet()
+
+    companion object{
+        fun makeBounce(one: Ball, two: Ball) {
+            val oneNewSpeed = one.physicReference.bounceOn(two.physicReference)
+            val twoNewSpeed = two.physicReference.bounceOn(one.physicReference)
+
+            one.physicReference = oneNewSpeed * BOUNCE_MULTIPLIER
+            two.physicReference = twoNewSpeed * BOUNCE_MULTIPLIER
+        }
+
+        fun getInnerRadiusForDepth(depth: Int): Double{
+            return SMALL_RADIUS * LAYER_RATIO.pow(-depth.toDouble())
+        }
+
+        fun getOuterRadiusForDepth(depth: Int): Double{
+            return getInnerRadiusForDepth(depth) * OUTER_RADIUS_RATIO
+        }
+    }
 
     fun checkCollisionsAndUpdate(){
         alreadyCheckedPairs.clear()
@@ -111,7 +114,15 @@ class Ball(
     }
 
     fun needToBounceWith(other: Ball): Boolean{
-        return willCollideWith(other) && isConvergentWith(other)
+        return hasCollisionWith(other) && isConvergentWith(other)
+    }
+
+    private fun hasCollisionWith(other: Ball): Boolean{
+        return if (CHECK_FUTURE_COLLISIONS){
+            willCollideWith(other)
+        } else {
+            isCollidingWith(other)
+        }
     }
 
     private fun willCollideWith(other: Ball): Boolean {
@@ -138,6 +149,14 @@ class Ball(
             (thisNextPosition.x - otherNextPosition.x).pow(2.0) +
                 (thisNextPosition.y - otherNextPosition.y).pow(2.0)) +
                 outerRadius > other.innerRadius
+    }
+
+    private fun isCollidingWith(other: Ball): Boolean{
+        return when {
+            depth == other.depth -> isCollidingWithBorderOf(other)
+            depth > other.depth -> isCollidingInternallyWith(other)
+            else -> other.isCollidingInternallyWith(this)
+        }
     }
 
     fun isCollidingInternallyWith(other: Ball): Boolean{
@@ -175,10 +194,10 @@ class Ball(
     }
 
     fun drawOn(sketch: PApplet) {
-        sketch.stroke(0)
-        sketch.strokeWeight(10.toFloat() / LAYER_RATIO.pow(depth.toDouble()).toFloat())
+        sketch.stroke(COLOR)
+        sketch.strokeWeight((outerRadius - innerRadius).toFloat())
         sketch.noFill()
-        sketch.circle(x.toFloat(), y.toFloat(), (outerRadius * 2).toFloat())
+        sketch.circle(x.toFloat(), y.toFloat(), (outerRadius + innerRadius).toFloat())
 
         children.forEach { it.drawOn(sketch) }
     }

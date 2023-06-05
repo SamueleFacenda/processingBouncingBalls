@@ -4,6 +4,9 @@ import processing.core.PApplet
 import vectors.PolarVector
 import kotlin.random.Random
 
+private const val MIN_SPEED = 40.0
+private const val MAX_SPEED = 100.0
+
 class BallContainer(
     private val height: Double = 0.0,
     private val width: Double = 0.0,
@@ -28,7 +31,7 @@ class BallContainer(
             startX = it.first,
             startY = it.second,
             startSpeed = PolarVector(
-                Random.nextDouble(40.0, 100.0),
+                Random.nextDouble(MIN_SPEED, MAX_SPEED),
                 Random.nextDouble(0.0, 2 * Math.PI)
             )
         )
