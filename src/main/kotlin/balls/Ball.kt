@@ -1,5 +1,7 @@
 package balls
 
+import balls.childCarrier.BallsCarryCalculator
+import balls.childCarrier.BruteInsideCarrier
 import processing.core.PApplet
 import vectors.CartesianVector
 import vectors.PolarVector
@@ -54,11 +56,11 @@ class Ball(
         }
     }
 
-    private val innerRadius = getInnerRadiusForDepth(depth)
-    private val outerRadius = getOuterRadiusForDepth(depth)
+    val innerRadius = getInnerRadiusForDepth(depth)
+    val outerRadius = getOuterRadiusForDepth(depth)
 
-    private val x: Double by this
-    private val y: Double by this
+    val x: Double by this
+    val y: Double by this
 
     operator fun getValue(ball: Ball, property: KProperty<*>): Double {
         return when (property.name) {
@@ -88,6 +90,8 @@ class Ball(
 
     private val latestBouncesCounter = mutableMapOf<Ball, Int>()
     private val nextCollisionsDirections = mutableSetOf<Double>()
+
+    private val carryCalculator: BallsCarryCalculator = BruteInsideCarrier(children, this)
 
     fun checkCollisionsAndUpdate(){
         updateDebouncerMap()
@@ -149,7 +153,7 @@ class Ball(
         return willCollide
     }
 
-    private fun isCollidingInternallyWith(other: Ball): Boolean{
+    fun isCollidingInternallyWith(other: Ball): Boolean{
         if (depth != other.depth - 1){
             throw IllegalArgumentException("Cannot check inner collision between balls of depth $depth and ${other.depth}")
         }
@@ -199,21 +203,11 @@ class Ball(
     }
 
     private fun carryOnChildren(){
+        val movesToDo = carryCalculator.computeRepositioningOfChildrenInParent()
         children.forEach {
-            if (isCollidingInternallyWith(it)){
-                carryOnChild(it)
-                it.carryOnChildren()
-            }
+            it.physicReference = it.physicReference.moveOf(movesToDo[it]!!)
+            it.carryOnChildren()
         }
-    }
-
-    private fun carryOnChild(child: Ball){
-        val direction = atan2(child.y - y, child.x - x)
-        val wantedDistance = innerRadius - child.outerRadius
-        val distance = sqrt((x - child.x).pow(2.0) + (y - child.y).pow(2.0))
-        val distanceToMove = wantedDistance - distance
-
-        child.physicReference = child.physicReference.moveOf(PolarVector(distanceToMove, direction))
     }
 
     fun checkForBounceOnBoundaryOf(width: Double, height: Double) {
