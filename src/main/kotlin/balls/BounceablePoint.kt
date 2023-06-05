@@ -78,8 +78,8 @@ class BounceablePoint(
         val thisSpeed = speed.getProjectOn(impactDirection).getLength()
         val otherSpeed = other.speed.getProjectOn(impactDirection).getLength()
 
+        // formula: https://www.youmath.it/lezioni/fisica/dinamica/2999-urti-elastici.html
         val thisFinalSpeed = (thisSpeed * (mass - other.mass) + otherSpeed * (2 * other.mass)) / (mass + other.mass)
-        val otherFinalSpeed = (otherSpeed * (other.mass - mass) + thisSpeed * (2 * mass)) / (mass + other.mass)
 
         return this + PolarVector(thisFinalSpeed, impactDirection) - PolarVector(thisSpeed, impactDirection)
     }
