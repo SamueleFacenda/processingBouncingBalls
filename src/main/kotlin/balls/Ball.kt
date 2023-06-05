@@ -15,7 +15,7 @@ private const val SMALL_RADIUS = 160.0
 private const val OUTER_RADIUS_RATIO = 1.1
 private const val LAYER_RATIO = 4.5
 private const val MASS_RATIO_POWER = 6
-private const val BOUNCE_MULTIPLIER = 1.0
+private const val BOUNCE_MULTIPLIER = 1.00001
 private const val DECELERATION = 0.997
 
 private const val CHECK_FUTURE_COLLISIONS = true
@@ -154,17 +154,17 @@ class Ball(
     private fun isCollidingWith(other: Ball): Boolean{
         return when {
             depth == other.depth -> isCollidingWithBorderOf(other)
-            depth > other.depth -> isCollidingInternallyWith(other)
-            else -> other.isCollidingInternallyWith(this)
+            depth > other.depth -> isCollidingWithTheInsideOf(other)
+            else -> other.isCollidingWithTheInsideOf(this)
         }
     }
 
-    fun isCollidingInternallyWith(other: Ball): Boolean{
-        if (depth != other.depth - 1){
+    fun isCollidingWithTheInsideOf(other: Ball): Boolean{
+        if (depth != other.depth + 1){
             throw IllegalArgumentException("Cannot check inner collision between balls of depth $depth and ${other.depth}")
         }
 
-        return sqrt((other.x - x).pow(2.0) + (other.y - y).pow(2.0)) + other.outerRadius > innerRadius
+        return sqrt((other.x - x).pow(2.0) + (other.y - y).pow(2.0)) + outerRadius > other.innerRadius
     }
 
     private fun isCollidingWithBorderOf(other: Ball): Boolean{

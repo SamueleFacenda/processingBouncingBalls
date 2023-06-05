@@ -14,7 +14,7 @@ class BruteInsideCarryCalculator(balls: List<Ball>, parent: Ball): BallsCarryCal
         ballsMovements.clear()
 
         balls.forEach {
-            if (parent.isCollidingInternallyWith(it)) {
+            if (it.isCollidingWithTheInsideOf(parent)) {
                 ballsMovements[it] = getCarriedPosition(it)
             } else {
                 ballsMovements[it] = CartesianVector(0.0, 0.0)
