@@ -39,7 +39,7 @@ class BallContainer(
 
     fun update(){
         checkForChildrenCollisions()
-        balls.forEach { it.checkCollisionsAndUpdate() }
+        balls.forEach { it.checkCollisionsAndBounce() }
         balls.forEach { it.updateForwardOfTime(1.0 / sketch.frameRate.toDouble()) }
         balls.forEach { it.checkForBounceOnBoundaryOf(width, height) }
     }

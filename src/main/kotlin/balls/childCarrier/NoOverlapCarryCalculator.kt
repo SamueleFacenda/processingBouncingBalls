@@ -1,22 +1,20 @@
 package balls.childCarrier
 
-import balls.Ball
+import balls.BounceableBall
 import vectors.Vector
-import java.util.Deque
-import java.util.Queue
 import kotlin.math.pow
 import kotlin.math.sqrt
 
 class NoOverlapCarryCalculator(
-    balls: List<Ball>,
-    parent: Ball
+    balls: List<BounceableBall>,
+    parent: BounceableBall
 ) : BallsCarryCalculator(balls, parent) {
 
-    private var toMove = ArrayDeque<Ball>()
-    private var moved = ArrayDeque<Ball>()
-    private val ballsMovements = mutableMapOf<Ball, Vector>()
+    private var toMove = ArrayDeque<BounceableBall>()
+    private var moved = ArrayDeque<BounceableBall>()
+    private val ballsMovements = mutableMapOf<BounceableBall, Vector>()
 
-    override fun computeRepositioningOfChildrenInParent(): Map<Ball, Vector> {
+    override fun computeRepositioningOfChildrenInParent(): Map<BounceableBall, Vector> {
         ballsMovements.clear()
         moved.clear()
         sortBallByDistanceToParent()
@@ -31,7 +29,7 @@ class NoOverlapCarryCalculator(
     }
 
     private fun computeMovementsStartingFromFurther() {
-        var tmp: Ball
+        var tmp: BounceableBall
         while(toMove.isNotEmpty()) {
             tmp = toMove.removeLast()
             arrangeBall(tmp)
@@ -39,7 +37,7 @@ class NoOverlapCarryCalculator(
         }
     }
 
-    private fun arrangeBall(ball: Ball){
+    private fun arrangeBall(ball: BounceableBall){
 
     }
 

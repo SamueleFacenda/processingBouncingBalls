@@ -1,11 +1,11 @@
 package balls.childCarrier
 
-import balls.Ball
+import balls.BounceableBall
 import vectors.Vector
 
 abstract class BallsCarryCalculator(
-    protected val balls: List<Ball>,
-    protected val parent: Ball
+    protected val balls: List<BounceableBall>,
+    protected val parent: BounceableBall
 ) {
-    abstract fun computeRepositioningOfChildrenInParent(): Map<Ball, Vector>
+    abstract fun computeRepositioningOfChildrenInParent(): Map<BounceableBall, Vector>
 }

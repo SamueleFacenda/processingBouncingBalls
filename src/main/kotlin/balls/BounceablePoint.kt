@@ -4,8 +4,6 @@ import vectors.CartesianVector
 import vectors.PolarVector
 import vectors.Vector
 import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.sin
 import kotlin.reflect.KProperty
 
 class BounceablePoint(
@@ -89,14 +87,6 @@ class BounceablePoint(
         val thisSpeed = speed.getProjectOn(impactDirection).getLength()
         val otherSpeed = other.speed.getProjectOn(impactDirection).getLength()
         return thisSpeed > otherSpeed
-    }
-
-    operator fun getValue(ball: Ball, property: KProperty<*>): Double {
-        return when (property.name) {
-            "x" -> x
-            "y" -> y
-            else -> throw IllegalArgumentException("Unknown property ${property.name}")
-        }
     }
 
 }
