@@ -27,7 +27,6 @@ open class BounceableBall(
         }
     }
 
-
     fun needToBounceWith(other: BounceableBall): Boolean{
         return hasCollisionWith(other) && isConvergentWith(other)
     }

@@ -13,7 +13,7 @@ class BallGenerator(
     private val y: Double,
     private val radius: Double,
     private val width: Double,
-    private val height: Double,
+    private val height: Double = width,
     private val isCircle: Boolean = true,
     keepBest: Boolean = true
 ) {
