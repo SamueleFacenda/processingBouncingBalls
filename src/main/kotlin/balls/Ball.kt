@@ -14,8 +14,8 @@ private const val COLOR = 0
 private const val SMALL_RADIUS = 160.0
 private const val OUTER_RADIUS_RATIO = 1.1
 private const val LAYER_RATIO = 4.5
-private const val MASS_RATIO_POWER = 6
-private const val BOUNCE_MULTIPLIER = 1.00001
+private const val MASS_RATIO_POWER = 5
+private const val BOUNCE_MULTIPLIER = 1.0
 private const val DECELERATION = 0.997
 
 private const val CHECK_FUTURE_COLLISIONS = true

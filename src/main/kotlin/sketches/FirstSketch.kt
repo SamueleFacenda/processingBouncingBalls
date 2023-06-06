@@ -5,8 +5,10 @@ import processing.core.PApplet
 
 private const val WIDTH = 1000
 private const val HEIGHT = 800
-private const val NUMBER_OF_CHILD = 6
-private const val NUMBER_OF_LAYER = 4
+private const val NUMBER_OF_CHILD = 5
+private const val NUMBER_OF_LAYER = 3
+private const val SAVE_FRAMES = false
+private const val TIME_VIDEO_LENGTH = 10.0
 
 object FirstSketch: PApplet() {
 
@@ -32,5 +34,13 @@ object FirstSketch: PApplet() {
 
         container.update()
         container.draw()
+
+        if (SAVE_FRAMES){
+            saveFrame("media/frames/####.png")
+            println("fps = $frameRate")
+            if (frameCount >= TIME_VIDEO_LENGTH * frameRate){
+                exit()
+            }
+        }
     }
 }
