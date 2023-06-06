@@ -16,13 +16,21 @@ object FirstSketch: PApplet() {
         size(WIDTH, HEIGHT)
     }
 
-    private val container = BallContainer(
-        height = HEIGHT.toDouble(),
-        width = WIDTH.toDouble(),
-        numberOfChild = NUMBER_OF_CHILD,
-        numberOfLayer = NUMBER_OF_LAYER,
-        sketch = this
-    )
+    private var container = getNewBallContainer()
+
+    private fun getNewBallContainer(): BallContainer{
+        return BallContainer(
+            height = HEIGHT.toDouble(),
+            width = WIDTH.toDouble(),
+            numberOfChild = NUMBER_OF_CHILD,
+            numberOfLayer = NUMBER_OF_LAYER,
+            sketch = this
+        )
+    }
+
+    override fun mousePressed() {
+        container = getNewBallContainer()
+    }
 
     override fun setup() {
         background(255)
