@@ -16,7 +16,7 @@ private const val MASS_RATIO_POWER = 5
 private const val BOUNCE_MULTIPLIER = 1.1
 private const val DECELERATION = 0.997
 
-private const val STROBO_COLOR = true
+private const val STROBO_COLOR = false
 
 class Ball(
     val numberOfChildren: Int = 0,
